@@ -1,0 +1,32 @@
+# HitEndCrystal Messages
+
+# Feedback messages
+click-success: "&#00FF00✓ &#F2AE2EClick! Total: &#F27B35{clicks}"
+click-cooldown: "&#BF2A45¡Espera &#F28B30{time}&#BF2A45s!"
+not-in-region: "&#D93A2B¡Debes estar en la zona de clicks!"
+
+# Goal messages
+goal-reached: "&#F2AE2E★ ¡Alcanzaste el objetivo de &#F27B35{goal} &#F2AE2Eclicks!"
+
+# Command messages
+stats-message:
+  - "&#F2AE2E========== &#F27B35Ender Hits &#F2AE2E=========="
+  - "&#F2AE2ETus clicks: &#F27B35{clicks}"
+  - "&#F2AE2EPosición: &#F28B30#{position}"
+  - "&#F2AE2EObjetivo: &#F27B35{clicks}&#F2AE2E/&#F28B30{goal}"
+  - "&#F2AE2E================================"
+
+top-header: "&#F2AE2E========== &#F27B35Top 10 Clickers &#F2AE2E=========="
+top-entry: "&#F28B30#{position} &#F2AE2E{player} &#F2AE2E- &#F27B35{clicks} clicks"
+top-footer: "&#F2AE2E================================"
+
+# Admin messages
+reload-success: "&#00FF00✓ &#F2AE2EPlugin recargado correctamente!"
+crystal-set: "&#00FF00✓ &#F2AE2ECrystal establecido en tu ubicación!"
+counter-reset: "&#00FF00✓ &#F2AE2EContador de &#F27B35{player} &#F2AE2Ereseteado!"
+
+# Error messages
+no-permission: "&#BF2A45¡No tienes permiso para usar este comando!"
+player-not-found: "&#D93A2B¡Jugador no encontrado!"
+invalid-world: "&#D93A2B¡Mundo inválido en la configuración!"
+database-error: "&#BF2A45Error de base de datos. Contacta un administrador."

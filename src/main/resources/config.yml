@@ -1,0 +1,50 @@
+# HitEndCrystal Configuration
+
+# WorldGuard region name
+region-name: "click-zone"
+
+# Cooldown in seconds between hits
+cooldown-seconds: 1
+
+# Enable/disable feedback messages on hit
+feedback-message: true
+
+# End Crystal location
+crystal-location:
+  world: "world"
+  x: 0.5
+  y: 64.0
+  z: 0.5
+
+# Sword item configuration
+sword-item:
+  material: DIAMOND_SWORD
+  name: "&#FF5555&lClick Sword"
+  lore:
+    - "&#AAAAAA¡Golpea el crystal!"
+  slot: 2
+  unbreakable: true
+  enchantments:
+    - "sharpness:5"
+    - "unbreaking:3"
+
+# Click goal configuration
+click-goal:
+  enabled: true
+  target: 1000
+  reset-after-goal: true
+  commands:
+    - "give {player} diamond 64"
+    - "broadcast &#FF5555{player} &#FFFFFFalcanzó &#FFAA001000 clicks!"
+
+# Database configuration
+database:
+  type: "SQLITE" # SQLITE or MYSQL
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "minecraft"
+    username: "root"
+    password: "password"
+    pool-size: 10
+
