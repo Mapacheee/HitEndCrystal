@@ -34,7 +34,10 @@ public class HitEndCrystalPlaceholder extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getVersion() {
-        return plugin.getPluginMeta().getVersion();
+        if (plugin != null && plugin.getPluginMeta() != null) {
+            return plugin.getPluginMeta().getVersion();
+        }
+        return "1.0.0";
     }
 
     @Override
@@ -48,6 +51,7 @@ public class HitEndCrystalPlaceholder extends PlaceholderExpansion {
             return "";
         }
 
+        // %hitendcrystal_player_clicks%
         if (params.equalsIgnoreCase("player_clicks")) {
             return String.valueOf(clickCounterService.getClicks(player));
         }
@@ -61,7 +65,7 @@ public class HitEndCrystalPlaceholder extends PlaceholderExpansion {
             }
         }
 
-        // Top placeholders
+        // Top placeholders: %hitendcrystal_top1_name%, %hitendcrystal_top1_clicks%, etc.
         if (params.startsWith("top")) {
             String[] parts = params.split("_");
             if (parts.length != 2) return "";
@@ -86,6 +90,6 @@ public class HitEndCrystalPlaceholder extends PlaceholderExpansion {
             }
         }
 
-        return null;
+        return "";
     }
 }

@@ -1,18 +1,17 @@
 plugins {
     id 'java-library'
-    id 'com.gradleup.shadow' version '9.2.2'
+    id 'com.gradleup.shadow' version '8.3.2'
+    id("io.github.revxrsal.zapper") version "1.0.3"
 }
 
 group = 'me.mapacheee'
 version = '1.0.0'
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven {
         url = uri("https://repo.papermc.io/repository/maven-public/")
-    }
-    maven {
-        url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
     }
     maven {
         url = uri("https://repo.extendedclip.com/releases/")
@@ -20,25 +19,32 @@ repositories {
     maven {
         url = uri("https://maven.enginehub.org/repo/")
     }
+    maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
+    maven { url = 'https://oss.sonatype.org/content/repositories/central' }
+    maven { url = 'https://hub.spigotmc.org/nexus/content/groups/public/' }
+    maven { url = 'https://jitpack.io' }
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
 
-    api("com.thewinterframework:paper:1.0.4")
-    annotationProcessor("com.thewinterframework:paper:1.0.4")
-    api("com.thewinterframework:configuration:1.0.1")
-    annotationProcessor("com.thewinterframework:configuration:1.0.1")
-    api("com.thewinterframework:command:1.0.1")
-    annotationProcessor("com.thewinterframework:command:1.0.1")
+    compileOnlyApi("com.thewinterframework:wintercore:1.0.0")
 
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.14")
     compileOnly("me.clip:placeholderapi:2.11.6")
 
-    implementation("com.zaxxer:HikariCP:5.1.0")
+    zap("com.zaxxer:HikariCP:5.1.0")
+    zap("org.xerial:sqlite-jdbc:3.46.0.0")
+    zap("com.mysql:mysql-connector-j:8.4.0")
 
-    implementation("org.xerial:sqlite-jdbc:3.46.0.0")
-    implementation("com.mysql:mysql-connector-j:8.4.0")
+    implementation("io.github.revxrsal:zapper.api:1.0.3")
+    implementation("net.kyori:adventure-text-serializer-legacy:4.17.0")
+}
+
+zapper {
+    libsFolder = "libraries"
+    relocationPrefix = "me.mapacheee.hitendcrystal.libs"
+    relocate("com.zaxxer.hikari", "hikari")
 }
 
 def targetJavaVersion = 21
@@ -63,7 +69,7 @@ processResources {
     def props = [version: version]
     inputs.properties props
     filteringCharset 'UTF-8'
-    filesMatching('plugin.yml') {
+    filesMatching('paper-plugin.yml') {
         expand props
     }
 }
@@ -77,7 +83,6 @@ shadowJar {
     exclude 'META-INF/LICENSE*'
     exclude 'META-INF/NOTICE*'
     exclude 'META-INF/maven/**'
-    relocate 'com.zaxxer.hikari', 'me.mapacheee.hitendcrystal.libs.hikari'
 }
 
 build {

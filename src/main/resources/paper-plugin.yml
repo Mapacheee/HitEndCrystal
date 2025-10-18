@@ -1,0 +1,31 @@
+name: HitEndCrystal
+version: '${version}'
+main: me.mapacheee.hitendcrystal.HitEndCrystalPlugin
+api-version: '1.21'
+description: Click counter plugin for End Crystals in lobbies
+authors: [Mapacheee]
+website: ""
+folia-supported: true
+libraries:
+  - org.xerial:sqlite-jdbc:3.46.0.0
+  - com.mysql:mysql-connector-j:8.4.0
+dependencies:
+  - name: WinterCore
+    optional: false
+    bootstrap: false
+    load: BEFORE
+  - name: PlaceholderAPI
+    optional: true
+    bootstrap: false
+    load: AFTER
+  - name: WorldGuard
+    optional: false
+    bootstrap: false
+    load: BEFORE
+permissions:
+  hitendcrystal.admin:
+    description: Admin permissions for HitEndCrystal
+    default: op
+  hitendcrystal.use:
+    description: Use the click counter
+    default: true

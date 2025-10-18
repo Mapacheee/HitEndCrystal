@@ -32,7 +32,12 @@ public class ClickCounterService {
 
     public void loadPlayer(Player player) {
         clickStorage.loadPlayer(player.getUniqueId(), player.getName())
-            .thenAccept(data -> playerDataCache.put(player.getUniqueId(), data));
+            .thenAccept(fetched -> {
+                playerDataCache.compute(fetched.uuid(), (uuid, existing) -> {
+                    if (existing == null) return fetched;
+                    return existing.clicks() >= fetched.clicks() ? existing : fetched;
+                });
+            });
     }
 
     public void unloadPlayer(Player player) {
@@ -127,4 +132,3 @@ public class ClickCounterService {
         return playerDataCache.get(uuid);
     }
 }
-

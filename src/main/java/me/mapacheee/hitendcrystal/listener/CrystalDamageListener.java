@@ -15,6 +15,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
 
 @ListenerComponent
@@ -44,25 +45,32 @@ public class CrystalDamageListener implements Listener {
         this.messageUtil = messageUtil;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onCrystalDamage(EntityDamageByEntityEvent event) {
-        if (!(event.getEntity() instanceof EnderCrystal crystal)) return;
-        if (!crystalService.isCrystal(crystal)) return;
+        if (!(event.getEntity() instanceof EnderCrystal crystalEntity)) return;
+
+        try {
+            crystalService.ensureLoaded();
+        } catch (Exception ignored) {
+        }
+
+        if (!crystalService.isCrystal(crystalEntity)) {
+            return;
+        }
 
         event.setCancelled(true);
 
         if (!(event.getDamager() instanceof Player player)) return;
 
-        if (!worldGuardService.isInRegion(player)) {
-            if (configService.getConfig() != null && configService.getConfig().feedbackMessage() && configService.getMessages() != null) {
-                String message = messageUtil.format(configService.getMessages().notInRegion());
-                player.sendMessage(message);
-            }
+        if (!worldguardCheck(player)) {
             return;
         }
 
-        ItemStack item = player.getInventory().getItemInMainHand();
-        if (!swordService.isClickSword(item)) {
+        ItemStack itemMain = player.getInventory().getItemInMainHand();
+        ItemStack itemOff = player.getInventory().getItemInOffHand();
+
+        boolean isSword = swordService.isClickSword(itemMain) || swordService.isClickSword(itemOff);
+        if (!isSword) {
             return;
         }
 
@@ -80,14 +88,52 @@ public class CrystalDamageListener implements Listener {
 
         clickCounterService.registerClick(player);
 
-        crystalService.playCrystalAnimation(crystal.getLocation());
+        crystalService.playCrystalAnimation(crystalEntity.getLocation());
+    }
+
+    private boolean worldguardCheck(Player player) {
+        if (!worldGuardService.isInRegion(player)) {
+            if (configService.getConfig() != null && configService.getConfig().feedbackMessage() && configService.getMessages() != null) {
+                String message = messageUtil.format(configService.getMessages().notInRegion());
+                player.sendMessage(message);
+            }
+            return false;
+        }
+        return true;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCrystalDamageGeneric(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof EnderCrystal crystal)) return;
+
+        try {
+            crystalService.ensureLoaded();
+        } catch (Exception ignored) {
+        }
+
         if (!crystalService.isCrystal(crystal)) return;
 
         event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onEntityExplode(EntityExplodeEvent event) {
+        if (!(event.getEntity() instanceof EnderCrystal crystal)) return;
+
+        try {
+            crystalService.ensureLoaded();
+        } catch (Exception ignored) {
+        }
+
+        if (!crystalService.isCrystal(crystal)) return;
+
+        event.setCancelled(true);
+
+        try {
+            if (!crystal.isDead()) {
+                crystalService.playCrystalAnimation(crystal.getLocation());
+            }
+        } catch (Exception ignored) {
+        }
     }
 }

@@ -3,7 +3,6 @@ package me.mapacheee.hitendcrystal.command;
 import com.google.inject.Inject;
 import com.thewinterframework.command.CommandComponent;
 import com.thewinterframework.service.ReloadServiceManager;
-import me.mapacheee.hitendcrystal.HitEndCrystalPlugin;
 import me.mapacheee.hitendcrystal.config.ConfigService;
 import me.mapacheee.hitendcrystal.data.ClickStorage;
 import me.mapacheee.hitendcrystal.data.PlayerClickData;
@@ -73,7 +72,6 @@ public class EnderHitsCommand {
 
     @Command("top")
     public void topCommand(final Source sender) {
-        // Check if config is loaded
         if (configService.getMessages() == null) {
             sender.source().sendMessage("§cPlugin configuration not loaded yet. Please try again.");
             return;
@@ -103,7 +101,6 @@ public class EnderHitsCommand {
     public void reloadCommand(final Source sender) {
         reloadServiceManager.reload();
 
-        // Check if messages loaded after reload
         if (configService.getMessages() != null) {
             sender.source().sendMessage(messageUtil.format(configService.getMessages().reloadSuccess()));
         } else {
@@ -118,20 +115,13 @@ public class EnderHitsCommand {
             sender.source().sendMessage(messageUtil.format("&#FF0000Este comando solo puede ser ejecutado por jugadores!"));
             return;
         }
-
-        Location loc = player.getLocation();
-        crystalService.setCrystalLocation(loc);
-
+        Location locationToSet = player.getLocation();
+        crystalService.setCrystalLocationAndRespawn(locationToSet);
         if (configService.getMessages() != null) {
             sender.source().sendMessage(messageUtil.format(configService.getMessages().crystalSet()));
         } else {
-            sender.source().sendMessage("§aEnder Crystal location set!");
+            sender.source().sendMessage("§aEnder Crystal location updated!");
         }
-
-        HitEndCrystalPlugin.getInstance().getLogger().info(
-            String.format("Crystal location set to: %s %.2f %.2f %.2f",
-                loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ())
-        );
     }
 
     @Command("reset <player>")

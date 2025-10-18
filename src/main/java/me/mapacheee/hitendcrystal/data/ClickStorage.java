@@ -1,6 +1,5 @@
 package me.mapacheee.hitendcrystal.data;
 
-
 import com.google.inject.Inject;
 import com.thewinterframework.service.annotation.Service;
 import com.zaxxer.hikari.HikariConfig;
@@ -12,12 +11,17 @@ import me.mapacheee.hitendcrystal.config.ConfigService;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Service
 public class ClickStorage {
 
     private final ConfigService configService;
     private HikariDataSource dataSource;
+
+    private final Map<UUID, PlayerClickData> inMemoryData = new ConcurrentHashMap<>();
+    private volatile List<PlayerClickData> topCache = new ArrayList<>();
 
     @Inject
     public ClickStorage(ConfigService configService) {
@@ -90,25 +94,31 @@ public class ClickStorage {
                 ResultSet rs = stmt.executeQuery();
 
                 if (rs.next()) {
-                    return new PlayerClickData(
+                    PlayerClickData data = new PlayerClickData(
                         uuid,
                         rs.getString("player_name"),
                         rs.getInt("clicks")
                     );
+                    updateCache(data);
+                    return data;
                 } else {
-                    // Create new player
                     PlayerClickData newData = new PlayerClickData(uuid, playerName, 0);
                     savePlayer(newData);
+                    updateCache(newData);
                     return newData;
                 }
             } catch (SQLException e) {
                 HitEndCrystalPlugin.getInstance().getLogger().severe("Error loading player: " + e.getMessage());
-                return new PlayerClickData(uuid, playerName, 0);
+                PlayerClickData fallback = new PlayerClickData(uuid, playerName, 0);
+                updateCache(fallback);
+                return fallback;
             }
         });
     }
 
     public void savePlayer(PlayerClickData data) {
+        updateCache(data);
+
         CompletableFuture.runAsync(() -> {
             ensureInitialized();
             String sql = """
@@ -144,6 +154,11 @@ public class ClickStorage {
     }
 
     public CompletableFuture<List<PlayerClickData>> getTopPlayers(int limit) {
+        if (!topCache.isEmpty()) {
+            List<PlayerClickData> snapshot = topCache.stream().limit(limit).collect(Collectors.toList());
+            return CompletableFuture.completedFuture(snapshot);
+        }
+
         return CompletableFuture.supplyAsync(() -> {
             ensureInitialized();
             String sql = "SELECT * FROM player_clicks ORDER BY clicks DESC LIMIT ?";
@@ -166,11 +181,27 @@ public class ClickStorage {
                 HitEndCrystalPlugin.getInstance().getLogger().severe("Error getting top players: " + e.getMessage());
             }
 
+            updateTopCache(topPlayers);
+
             return topPlayers;
         });
     }
 
     public CompletableFuture<Integer> getPlayerPosition(UUID uuid) {
+        if (inMemoryData.containsKey(uuid) && !topCache.isEmpty()) {
+            PlayerClickData target = inMemoryData.get(uuid);
+            int pos = 1;
+            for (PlayerClickData p : topCache) {
+                if (p.uuid().equals(uuid)) return CompletableFuture.completedFuture(pos);
+                pos++;
+            }
+            int higher = 0;
+            for (PlayerClickData p : inMemoryData.values()) {
+                if (p.clicks() > target.clicks()) higher++;
+            }
+            return CompletableFuture.completedFuture(higher + 1);
+        }
+
         return CompletableFuture.supplyAsync(() -> {
             ensureInitialized();
             String sql = """
@@ -197,6 +228,9 @@ public class ClickStorage {
     }
 
     public void resetPlayer(UUID uuid) {
+        inMemoryData.remove(uuid);
+        rebuildTopCacheFromInMemory();
+
         CompletableFuture.runAsync(() -> {
             ensureInitialized();
             String sql = "UPDATE player_clicks SET clicks = 0 WHERE uuid = ?";
@@ -210,6 +244,22 @@ public class ClickStorage {
                 HitEndCrystalPlugin.getInstance().getLogger().severe("Error resetting player: " + e.getMessage());
             }
         });
+    }
+
+    private synchronized void updateCache(PlayerClickData data) {
+        inMemoryData.put(data.uuid(), data);
+        rebuildTopCacheFromInMemory();
+    }
+
+    private synchronized void updateTopCache(List<PlayerClickData> list) {
+        this.topCache = new ArrayList<>(list);
+    }
+
+    private synchronized void rebuildTopCacheFromInMemory() {
+        List<PlayerClickData> sorted = inMemoryData.values().stream()
+            .sorted(Comparator.comparingInt(PlayerClickData::clicks).reversed())
+            .collect(Collectors.toList());
+        this.topCache = sorted;
     }
 
     public void close() {

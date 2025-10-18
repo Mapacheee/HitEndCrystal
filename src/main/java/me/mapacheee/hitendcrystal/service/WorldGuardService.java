@@ -23,27 +23,39 @@ public class WorldGuardService {
     }
 
     public boolean isInRegion(Player player) {
+        if (configService == null || configService.getConfig() == null) return false;
+
         String regionName = configService.getConfig().regionName();
+        if (regionName == null || regionName.isBlank()) return false;
+
         Location location = player.getLocation();
 
-        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-        RegionManager regions = container.get(BukkitAdapter.adapt(location.getWorld()));
+        try {
+            RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+            RegionManager regions = container.get(BukkitAdapter.adapt(location.getWorld()));
 
-        if (regions == null) return false;
+            if (regions == null) return false;
 
-        ProtectedRegion region = regions.getRegion(regionName);
-        if (region == null) return false;
+            ProtectedRegion region = regions.getRegion(regionName);
+            if (region == null) return false;
 
-        return region.contains(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+            return region.contains(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public boolean regionExists(String regionName, org.bukkit.World world) {
-        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-        RegionManager regions = container.get(BukkitAdapter.adapt(world));
+        if (regionName == null || world == null) return false;
+        try {
+            RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+            RegionManager regions = container.get(BukkitAdapter.adapt(world));
 
-        if (regions == null) return false;
+            if (regions == null) return false;
 
-        return regions.hasRegion(regionName);
+            return regions.hasRegion(regionName);
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
-

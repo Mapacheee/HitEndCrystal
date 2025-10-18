@@ -88,9 +88,16 @@ public class SwordService {
         ItemStack sword = createSword();
         int slot = configService.getConfig().swordItem().slot();
 
-        ItemStack itemInSlot = player.getInventory().getItem(slot);
+        int invSize = player.getInventory().getSize();
+        if (slot < 0 || slot >= invSize) {
+            HitEndCrystalPlugin.getInstance().getLogger().warning("Configured sword slot out of range: " + slot + ". Using first empty slot instead.");
+            slot = -1;
+        }
+
+        ItemStack itemInSlot = slot == -1 ? null : player.getInventory().getItem(slot);
         if (itemInSlot == null || itemInSlot.getType() == Material.AIR) {
-            player.getInventory().setItem(slot, sword);
+            int targetSlot = slot == -1 ? player.getInventory().firstEmpty() : slot;
+            player.getInventory().setItem(targetSlot, sword);
         } else {
             int emptySlot = player.getInventory().firstEmpty();
             if (emptySlot != -1) {
