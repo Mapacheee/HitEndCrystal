@@ -12,24 +12,29 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.NamespacedKey;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.slf4j.Logger;
 
 @Service
 public class CrystalService {
 
     private final ConfigService configService;
+    private final Logger logger;
+    private final HitEndCrystalPlugin plugin;
     private Location crystalLocation;
     private EnderCrystal crystal;
     private boolean initialized = false;
     private NamespacedKey crystalKey;
 
     @Inject
-    public CrystalService(ConfigService configService) {
+    public CrystalService(ConfigService configService, Logger logger, HitEndCrystalPlugin plugin) {
         this.configService = configService;
+        this.logger = logger;
+        this.plugin = plugin;
     }
 
     private NamespacedKey getCrystalKey() {
         if (crystalKey == null) {
-            crystalKey = new NamespacedKey(HitEndCrystalPlugin.getInstance(), "hitendcrystal_entity");
+            crystalKey = new NamespacedKey(plugin, "hitendcrystal_entity");
         }
         return crystalKey;
     }
@@ -75,43 +80,22 @@ public class CrystalService {
                 } catch (Exception e) {
                 }
             }
-        }.runTaskTimer(HitEndCrystalPlugin.getInstance(), 20L, 20L);
+        }.runTaskTimer(plugin, 20L, 20L);
     }
 
     private void initOrLinkCrystal() {
         ensureInitialized();
         if (crystalLocation == null) return;
 
-        try {
-            for (Entity e : crystalLocation.getWorld().getNearbyEntities(crystalLocation, 2, 2, 2)) {
-                if (e instanceof EnderCrystal found) {
-                    try {
-                        if (found.getPersistentDataContainer().has(getCrystalKey(), PersistentDataType.BYTE) || found.getScoreboardTags().contains("hitendcrystal_tag")) {
-                            this.crystal = found;
-                            this.crystal.setShowingBottom(false);
-                            this.crystal.getPersistentDataContainer().set(getCrystalKey(), PersistentDataType.BYTE, (byte)1);
-                            this.crystal.addScoreboardTag("hitendcrystal_tag");
-                            HitEndCrystalPlugin.getInstance().getLogger().info("Found existing marked EnderCrystal and linked it.");
-                            return;
-                        }
-                    } catch (Exception ignored) {
-                    }
-                }
+        crystalLocation.getChunk().load();
+        for (Entity e : crystalLocation.getWorld().getNearbyEntities(crystalLocation, 2, 2, 2)) {
+            if (e instanceof EnderCrystal) {
+                e.remove();
             }
-
-            for (Entity e : crystalLocation.getWorld().getNearbyEntities(crystalLocation, 2, 2, 2)) {
-                if (e instanceof EnderCrystal found) {
-                    try {
-                        found.remove();
-                    } catch (Exception ignored) {
-                    }
-                }
-            }
-        } catch (Exception ignored) {
         }
 
         spawnCrystal();
-        HitEndCrystalPlugin.getInstance().getLogger().info("Spawned EnderCrystal at configured location.");
+        logger.info("Spawned EnderCrystal at configured location.");
     }
 
     public void spawnCrystal() {
@@ -143,15 +127,15 @@ public class CrystalService {
         location.getWorld().spawnParticle(
             Particle.EXPLOSION,
             location,
-            1,
-            0, 0, 0,
+            10,
+            0.5, 0.5, 0.5,
             0
         );
 
         location.getWorld().playSound(
             location,
             Sound.ENTITY_GENERIC_EXPLODE,
-            1.0f,
+            2.0f,
             1.0f
         );
 
@@ -162,6 +146,10 @@ public class CrystalService {
             ensureInitialized();
         }
         if (entity == null) return false;
+
+        if (entity.getScoreboardTags().contains("hitendcrystal_tag")) {
+            return true;
+        }
 
         try {
             if (entity.getPersistentDataContainer().has(getCrystalKey(), PersistentDataType.BYTE)) {

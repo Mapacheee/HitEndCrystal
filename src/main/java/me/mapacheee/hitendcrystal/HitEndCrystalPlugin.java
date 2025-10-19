@@ -2,12 +2,12 @@ package me.mapacheee.hitendcrystal;
 
 import com.thewinterframework.paper.PaperWinterPlugin;
 import com.thewinterframework.plugin.WinterBootPlugin;
-import revxrsal.zapper.DependencyManager;
+/*import revxrsal.zapper.DependencyManager;
 import revxrsal.zapper.RuntimeLibPluginConfiguration;
 import revxrsal.zapper.classloader.URLClassLoaderWrapper;
 
 import java.io.File;
-import java.net.URLClassLoader;
+import java.net.URLClassLoader;*/
 
 @WinterBootPlugin
 public class HitEndCrystalPlugin extends PaperWinterPlugin {
@@ -17,7 +17,7 @@ public class HitEndCrystalPlugin extends PaperWinterPlugin {
     public HitEndCrystalPlugin() {
     }
 
-    @Override
+    /*@Override
     public void onPluginLoad() {
         super.onPluginLoad();
         instance = this;
@@ -36,7 +36,7 @@ public class HitEndCrystalPlugin extends PaperWinterPlugin {
         config.getRepositories().forEach(dependencyManager::repository);
         config.getRelocations().forEach(dependencyManager::relocate);
         dependencyManager.load();
-    }
+    }*/
 
     @Override
     public void onPluginEnable() {

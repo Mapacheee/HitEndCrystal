@@ -32,17 +32,20 @@ public class PlayerListener implements Listener {
     private final ConfigService configService;
     private final ClickCounterService clickCounterService;
     private final SwordService swordService;
+    private final HitEndCrystalPlugin plugin;
     private final Set<UUID> playersInRegion = new HashSet<>();
 
     @Inject
     public PlayerListener(
         ConfigService configService,
         ClickCounterService clickCounterService,
-        SwordService swordService
+        SwordService swordService,
+        HitEndCrystalPlugin plugin
     ) {
         this.configService = configService;
         this.clickCounterService = clickCounterService;
         this.swordService = swordService;
+        this.plugin = plugin;
     }
 
     @EventHandler
@@ -50,12 +53,10 @@ public class PlayerListener implements Listener {
         Player player = event.getPlayer();
         clickCounterService.loadPlayer(player);
 
-        Bukkit.getScheduler().runTaskLater(HitEndCrystalPlugin.getInstance(), () -> {
-            if (isInRegion(player)) {
-                playersInRegion.add(player.getUniqueId());
-                swordService.giveSword(player);
-            }
-        }, 10L);
+        if (isInRegion(player)) {
+            playersInRegion.add(player.getUniqueId());
+            swordService.giveSword(player);
+        }
     }
 
     @EventHandler

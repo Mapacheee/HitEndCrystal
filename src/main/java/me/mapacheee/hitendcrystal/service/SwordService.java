@@ -25,17 +25,19 @@ public class SwordService {
 
     private final ConfigService configService;
     private final MessageUtil messageUtil;
+    private final HitEndCrystalPlugin plugin;
     private NamespacedKey swordKey;
 
     @Inject
-    public SwordService(ConfigService configService, MessageUtil messageUtil) {
+    public SwordService(ConfigService configService, MessageUtil messageUtil, HitEndCrystalPlugin plugin) {
         this.configService = configService;
         this.messageUtil = messageUtil;
+        this.plugin = plugin;
     }
 
     private NamespacedKey getSwordKey() {
         if (swordKey == null) {
-            swordKey = new NamespacedKey(HitEndCrystalPlugin.getInstance(), "click_sword");
+            swordKey = new NamespacedKey(plugin, "click_sword");
         }
         return swordKey;
     }
@@ -75,7 +77,7 @@ public class SwordService {
                             sword.addUnsafeEnchantment(enchant, level);
                         }
                     } catch (Exception e) {
-                        HitEndCrystalPlugin.getInstance().getLogger().warning("Invalid enchantment: " + enchantStr);
+                        plugin.getLogger().warning("Invalid enchantment: " + enchantStr);
                     }
                 }
             }
@@ -90,7 +92,7 @@ public class SwordService {
 
         int invSize = player.getInventory().getSize();
         if (slot < 0 || slot >= invSize) {
-            HitEndCrystalPlugin.getInstance().getLogger().warning("Configured sword slot out of range: " + slot + ". Using first empty slot instead.");
+            plugin.getLogger().warning("Configured sword slot out of range: " + slot + ". Using first empty slot instead.");
             slot = -1;
         }
 

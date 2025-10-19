@@ -9,17 +9,21 @@ import me.mapacheee.hitendcrystal.data.ClickStorage;
 import me.mapacheee.hitendcrystal.placeholder.HitEndCrystalPlaceholder;
 import org.bukkit.Bukkit;
 
+import java.util.logging.Level;
+
 @Service
 public class PlaceholderService {
 
     private final ClickCounterService clickCounterService;
     private final ClickStorage clickStorage;
+    private final HitEndCrystalPlugin plugin;
     private HitEndCrystalPlaceholder placeholder;
 
     @Inject
-    public PlaceholderService(ClickCounterService clickCounterService, ClickStorage clickStorage) {
+    public PlaceholderService(ClickCounterService clickCounterService, ClickStorage clickStorage, HitEndCrystalPlugin plugin) {
         this.clickCounterService = clickCounterService;
         this.clickStorage = clickStorage;
+        this.plugin = plugin;
     }
 
     @OnEnable
@@ -28,45 +32,22 @@ public class PlaceholderService {
             try {
                 registerPlaceholders();
             } catch (Exception e) {
-                if (HitEndCrystalPlugin.getInstance() != null) {
-                    HitEndCrystalPlugin.getInstance().getLogger().warning("Failed to register PlaceholderAPI hooks: " + e.getMessage());
-                }
+                plugin.getLogger().log(Level.SEVERE, "Failed to register placeholders", e);
             }
         } else {
-            if (HitEndCrystalPlugin.getInstance() != null) {
-                HitEndCrystalPlugin.getInstance().getLogger().warning("PlaceholderAPI not found! Placeholders will not work.");
-            }
-        }
-    }
-
-    @OnDisable
-    public void onDisable() {
-        try {
-            unregister();
-        } catch (Exception e) {
+            plugin.getLogger().warning("PlaceholderAPI not found! Placeholders will not work.");
         }
     }
 
     private void registerPlaceholders() {
-        placeholder = new HitEndCrystalPlaceholder(
-            HitEndCrystalPlugin.getInstance(),
-            clickCounterService,
-            clickStorage
-        );
-
-        if (placeholder.register()) {
-            HitEndCrystalPlugin.getInstance().getLogger().info("PlaceholderAPI hooks registered successfully!");
-        } else {
-            HitEndCrystalPlugin.getInstance().getLogger().warning("Failed to register PlaceholderAPI hooks!");
-        }
+        placeholder = new HitEndCrystalPlaceholder(plugin, clickCounterService, clickStorage);
+        placeholder.register();
     }
 
-    private void unregister() {
+    @OnDisable
+    public void onDisable() {
         if (placeholder != null) {
             placeholder.unregister();
-            if (HitEndCrystalPlugin.getInstance() != null) {
-                HitEndCrystalPlugin.getInstance().getLogger().info("PlaceholderAPI hooks unregistered.");
-            }
         }
     }
 }

@@ -13,13 +13,11 @@ public class ConfigService {
 
     private final Container<Config> configContainer;
     private final Container<Messages> messagesContainer;
-    private final Container<CrystalLocationConfig> crystalLocationContainer;
 
     @Inject
-    public ConfigService(Container<Config> configContainer, Container<Messages> messagesContainer, Container<CrystalLocationConfig> crystalLocationContainer) {
+    public ConfigService(Container<Config> configContainer, Container<Messages> messagesContainer) {
         this.configContainer = configContainer;
         this.messagesContainer = messagesContainer;
-        this.crystalLocationContainer = crystalLocationContainer;
     }
 
     public Config getConfig() {
@@ -30,32 +28,30 @@ public class ConfigService {
         return messagesContainer.get();
     }
 
-    public CrystalLocationConfig getCrystalLocationConfig() {
-        return crystalLocationContainer.get();
-    }
-
     @OnReload
     public void reload() {
         configContainer.reload();
         messagesContainer.reload();
-        crystalLocationContainer.reload();
     }
 
     public Location getCrystalLocation() {
-        CrystalLocationConfig config = getCrystalLocationConfig();
-        World world = Bukkit.getWorld(config.world);
+        Config.CrystalLocation cl = configContainer.get().crystalLocation();
+        World world = Bukkit.getWorld(cl.world());
         if (world != null) {
-            return new Location(world, config.x, config.y, config.z);
+            return new Location(world, cl.x(), cl.y(), cl.z());
         }
         return null;
     }
 
     public boolean setCrystalLocation(Location location) {
-        return crystalLocationContainer.update(config -> new CrystalLocationConfig(
-            location.getWorld().getName(),
-            location.getX(),
-            location.getY(),
-            location.getZ()
+        return configContainer.update(config -> new Config(
+            config.regionName(),
+            config.cooldownSeconds(),
+            config.feedbackMessage(),
+            new Config.CrystalLocation(location.getWorld().getName(), location.getX(), location.getY(), location.getZ()),
+            config.swordItem(),
+            config.clickGoal(),
+            config.database()
         ));
     }
 }
