@@ -14,8 +14,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerAnimationEvent;
+import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.inventory.ItemStack;
 
 @ListenerComponent
@@ -49,13 +50,12 @@ public class CrystalDamageListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onCrystalDamage(EntityDamageByEntityEvent event) {
-        if (!(event.getEntity() instanceof EnderCrystal crystal)) return;
-        if (!crystalService.isCrystal(crystal)) return;
+    public void onPlayerSwing(PlayerAnimationEvent event) {
+        if (event.getAnimationType() != PlayerAnimationType.ARM_SWING) return;
 
-        event.setCancelled(true);
-
-        if (!(event.getDamager() instanceof Player player)) return;
+        Player player = event.getPlayer();
+        EnderCrystal crystal = (EnderCrystal) player.getTargetEntity(5);
+        if (crystal == null || !crystalService.isCrystal(crystal)) return;
 
         if (!worldGuardService.isInRegion(player)) {
             if (configService.getConfig() != null && configService.getConfig().feedbackMessage() && configService.getMessages() != null) {

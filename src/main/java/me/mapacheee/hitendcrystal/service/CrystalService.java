@@ -112,6 +112,7 @@ public class CrystalService {
         crystalLocation.getChunk().load();
         crystal = (EnderCrystal) crystalLocation.getWorld().spawnEntity(crystalLocation, EntityType.END_CRYSTAL);
         crystal.setShowingBottom(false);
+        crystal.setInvulnerable(true);
         try {
             crystal.getPersistentDataContainer().set(getCrystalKey(), PersistentDataType.BYTE, (byte)1);
         } catch (Exception ignored) {
@@ -127,15 +128,15 @@ public class CrystalService {
         location.getWorld().spawnParticle(
             Particle.EXPLOSION,
             location,
-            10,
+            20,
             0.5, 0.5, 0.5,
             0
         );
 
         location.getWorld().playSound(
             location,
-            Sound.ENTITY_GENERIC_EXPLODE,
-            2.0f,
+            Sound.ENTITY_DRAGON_FIREBALL_EXPLODE,
+            10.0f,
             1.0f
         );
 
