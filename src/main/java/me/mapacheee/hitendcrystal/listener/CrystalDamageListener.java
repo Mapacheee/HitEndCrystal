@@ -10,6 +10,7 @@ import me.mapacheee.hitendcrystal.service.SwordService;
 import me.mapacheee.hitendcrystal.service.WorldGuardService;
 import me.mapacheee.hitendcrystal.util.MessageUtil;
 import org.bukkit.entity.EnderCrystal;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -54,8 +55,10 @@ public class CrystalDamageListener implements Listener {
         if (event.getAnimationType() != PlayerAnimationType.ARM_SWING) return;
 
         Player player = event.getPlayer();
-        EnderCrystal crystal = (EnderCrystal) player.getTargetEntity(5);
-        if (crystal == null || !crystalService.isCrystal(crystal)) return;
+        Entity target = player.getTargetEntity(5);
+        if (!(target instanceof EnderCrystal)) return;
+        EnderCrystal crystal = (EnderCrystal) target;
+        if (!crystalService.isCrystal(crystal)) return;
 
         if (!worldGuardService.isInRegion(player)) {
             if (configService.getConfig() != null && configService.getConfig().feedbackMessage() && configService.getMessages() != null) {
