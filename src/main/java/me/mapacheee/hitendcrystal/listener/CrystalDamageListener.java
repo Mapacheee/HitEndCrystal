@@ -2,6 +2,7 @@ package me.mapacheee.hitendcrystal.listener;
 
 import com.google.inject.Inject;
 import com.thewinterframework.paper.listener.ListenerComponent;
+import me.mapacheee.hitendcrystal.HitEndCrystalPlugin;
 import me.mapacheee.hitendcrystal.config.ConfigService;
 import me.mapacheee.hitendcrystal.service.ClickCounterService;
 import me.mapacheee.hitendcrystal.service.CrystalService;
@@ -26,6 +27,7 @@ public class CrystalDamageListener implements Listener {
     private final WorldGuardService worldGuardService;
     private final SwordService swordService;
     private final MessageUtil messageUtil;
+    private final HitEndCrystalPlugin plugin;
 
     @Inject
     public CrystalDamageListener(
@@ -34,7 +36,8 @@ public class CrystalDamageListener implements Listener {
         CrystalService crystalService,
         WorldGuardService worldGuardService,
         SwordService swordService,
-        MessageUtil messageUtil
+        MessageUtil messageUtil,
+        HitEndCrystalPlugin plugin
     ) {
         this.configService = configService;
         this.clickCounterService = clickCounterService;
@@ -42,6 +45,7 @@ public class CrystalDamageListener implements Listener {
         this.worldGuardService = worldGuardService;
         this.swordService = swordService;
         this.messageUtil = messageUtil;
+        this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

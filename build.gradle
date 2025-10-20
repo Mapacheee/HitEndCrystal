@@ -33,10 +33,6 @@ dependencies {
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.14")
     compileOnly("me.clip:placeholderapi:2.11.6")
 
-    //zap("com.zaxxer:HikariCP:5.1.0")
-    //zap("org.xerial:sqlite-jdbc:3.46.0.0")
-    //zap("com.mysql:mysql-connector-j:8.4.0")
-
     implementation("com.zaxxer:HikariCP:7.0.2")
     implementation("net.kyori:adventure-text-serializer-legacy:4.17.0")
 }
@@ -69,6 +65,8 @@ processResources {
 }
 
 shadowJar {
+    relocate 'com.zaxxer.hikari', 'me.mapacheee.hitendcrystal.libs.hikari'
+
     archiveClassifier.set('')
 
     exclude 'META-INF/*.SF'
